@@ -1,0 +1,157 @@
+Sub StockAnalysis()
+
+        Dim ws As Worksheet
+        
+            'Making sure that the Macro goes through all the sheets
+            
+            For Each ws In Worksheets
+            ws.Activate
+            
+            
+    'Setting up the headers for the columns we want enter the calculated data in
+        
+        Range("I1").Value = "Ticker"
+        Range("J1").Value = "Yearly Change"
+        Range("K1").Value = "Percent Change"
+        Range("L1").Value = "Total Stock Volume"
+        
+    'Making the headers bold so they are easy to spot
+    
+        Range("I1:L1").Font.Bold = True
+        
+    'And to make the columns wide for our data to fit in nicely
+        Columns("I:L").AutoFit
+        
+    'Declaring some variables we'll need for calculations
+    
+        Dim YearlyChange As Double
+        Dim TotalValue As Double
+        Dim OpenPrice As Double
+        Dim ClosePrice As Double
+        Dim RowCount As Long
+        Dim OutputRow As Long
+        
+     'setting up this section for the second part of this project
+    
+    
+        Cells(2, "O").Value = "Greatest % Increase"
+        Cells(3, "o").Value = "Greatest % Decrease"
+        Cells(4, "O").Value = "Greatest Total Volume"
+        Cells(1, "P").Value = "Ticker"
+        Cells(1, "Q").Value = "Value"
+        
+        Range("P1:Q1").Font.Bold = True
+        Range("O1:O4").Font.Bold = True
+        
+    'Initializing variablefor each worksheet where data starts
+
+        TotalValue = 0
+    'And the count should srart from the second row since the first row is already filled with titles
+        OutputRow = 2
+        
+        OpenPrice = Cells(2, "C").Value
+        
+    'Also, to make sure that all the rows in the data set are counted:
+        RowCount = Cells(Rows.Count, "A").End(xlUp).Row
+        
+    
+    
+    'Looping through all the rows and accumulating the data for TotalValue and updating Open and ClosePrice
+    
+    
+        Dim i As Long
+     
+        For i = 2 To RowCount
+        
+        
+                TotalValue = TotalValue + Cells(i, "G").Value
+
+                'Looping the data in each row and
+                
+                    If Cells(i, "A").Value <> Cells(i + 1, "A").Value Then
+                    
+                    ' Then when it gets the closing price of the current stock
+                        ClosePrice = Cells(i, "F").Value
+
+                            YearlyChange = ClosePrice - OpenPrice
+                 
+                            
+                                 If OpenPrice <> 0 Then
+                                    PercentChange = YearlyChange / OpenPrice
+                        Else
+                            PercentChange = 0
+                    End If
+
+            'Recording the calculated data in the designated columns
+            
+                Cells(OutputRow, "I").Value = Cells(i, "A").Value
+                Cells(OutputRow, "J").Value = YearlyChange
+                Cells(OutputRow, "K").Value = PercentChange
+                Cells(OutputRow, "K").NumberFormat = "0.00%"
+                Cells(OutputRow, "L").Value = TotalValue
+                
+            
+                    Range("P2").Value = TickerGreatestIncrease
+                    Range("P3").Value = TickerGreatestDecrease
+                    Range("P4").Value = TickerGreatestTotal
+                    Range("Q2").Value = GreatestIncrease
+                    Range("Q3").Value = GreatestDecrease
+                    Range("Q4").Value = GreatestTotal
+                    Range("Q2:Q3").NumberFormat = "0.00%"
+                
+                
+                'First defining the last row of our second 'Ticker Column'
+                    TickerLastRow = Cells(Rows.Count, "I").End(xlUp).Row
+                    
+                'Now moving on to for loop
+                    For j = 2 To TickerLastRow
+                    
+                'Looping and If statement to find Greatest changees and Total
+        
+                    If Range("k" & j + 1) > GreatestIncrease Then
+                    
+                        GreatestIncrease = Range("K" & j + 1).Value
+                        TickerGreatestIncrease = Range("I" & j + 1).Value
+                        
+                    ElseIf Range("K" & j + 1).Value < GreatestDecrease Then
+                    
+                        GreatestDecrease = Range("K" & j + 1).Value
+                        TickerGreatestDecrease = Range("I" & j + 1).Value
+                        
+                    ElseIf Range("L" & j + 1).Value > GreatestTotal Then
+                    
+                        GreatestTotal = Range("L" & j + 1).Value
+                        TickerGreatestTotal = Range("I" & j + 1).Value
+                        
+                    End If
+                    Next j
+                    
+                    
+               
+
+                'Applying conditional color coding to the "yearly change" column( green for cells: if negative red and no color if 0)
+                
+                    If YearlyChange > 0 Then
+                        Cells(OutputRow, "J").Interior.ColorIndex = 4
+                        
+                        ElseIf YearlyChange < 0 Then
+                        Cells(OutputRow, "J").Interior.ColorIndex = 3
+                    
+                        Else
+                        Cells(OutputRow, "J").Interior.ColorIndex = 0
+                    End If
+
+             ' Now to move down the rows, ensuring each piece of data is written to a new row
+                TotalValue = 0
+                OutputRow = OutputRow + 1
+                
+                
+
+                ' If we're not at the end, we get the next opening price
+                If i + 1 <= RowCount Then
+                    OpenPrice = Cells(i + 1, "C").Value
+                End If
+            End If
+        Next i
+    Next ws
+End Sub
